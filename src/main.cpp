@@ -6,7 +6,7 @@ FASTLED_USING_NAMESPACE;
 #endif
 
 // clang-format off
-#define DATA_PIN     3
+#define DATA_PIN     2
 #define LED_TYPE     WS2811
 //#define COLOR_ORDER RGB
 
@@ -20,8 +20,13 @@ CRGB leds[NUM_LEDS];
 #define MILLIS_PER_FRAME  1000/FRAMES_PER_SECOND
 // clang-format on
 
+void onEnterFrame();
+void addGlitter(fract8 chanceOfGlitter);
+void xmas_rgbop();
+void xmas_rgbop_range();
+
 void setup() {
-  delay(1000);
+  delay(500);
 
   // Time.zone(-8);  // Set Pacific Time Zone
 
@@ -35,7 +40,7 @@ void setup() {
 
 uint8_t gHue = 0;
 void loop() {
-  EVERY_N_SECONDS(60) {
+  EVERY_N_SECONDS(10) {
     // 4PM to 1 AM
     // if (Time.hour() > 16 || Time.hour() < 1) {
     //   FastLED.setBrightness(BRIGHTNESS_NIGHT);
@@ -45,44 +50,44 @@ void loop() {
     gHue++;
   }
 
-  EVERY_N_MILLISECONDS(MILLIS_PER_FRAME) { onEnterFrame(); }
-  // onEnterFrame();
+  // EVERY_N_MILLISECONDS(MILLIS_PER_FRAME) { onEnterFrame(); }
+  onEnterFrame();
 }
 
 void onEnterFrame() {
   // xmas_rgbop();
   xmas_rgbop_range();
-  addGlitter(80);
+  addGlitter(20);
 
   FastLED.show();
-}
-
-void xmas_rgbop() {
-  // Red, Green, Blue, Orange, and Purple cycling Xmas lights
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
-    switch ((gHue) % 5) {
-      case 0:
-        leds[i] = CRGB(0xfff276);
-        break;
-      case 1:
-        leds[i] = CRGB(0x6aff7a);
-        break;
-      case 2:
-        leds[i] = CRGB(0x5c65ff);
-        break;
-      case 3:
-        leds[i] = CRGB(0xffae3f);
-        break;
-      case 4:
-        leds[i] = CRGB(0xc33fff);
-        break;
-    }
-  }
 }
 
 void addGlitter(fract8 chanceOfGlitter) {
   if (random8() < chanceOfGlitter) {
     leds[random16(NUM_LEDS)] += CRGB::White;
+  }
+}
+
+void xmas_rgbop() {
+  // Red, Green, Blue, Orange, and Purple cycling Xmas lights
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    switch ((i + gHue) % 5) {
+      case 0:
+        leds[i] = CRGB(0xFF0000);
+        break;
+      case 1:
+        leds[i] = CRGB(0x00FF00);
+        break;
+      case 2:
+        leds[i] = CRGB(0x0000FF);
+        break;
+      case 3:
+        leds[i] = CRGB(0xFFA500);
+        break;
+      case 4:
+        leds[i] = CRGB(0xFF00FF);
+        break;
+    }
   }
 }
 
@@ -136,8 +141,8 @@ void xmas_rgbop_range() {
   for (uint8_t i = 0; i < NUM_LEDS; i++) {
     // Find the brightness using a sine wave.
     // WARNING: A max of 254 works, 255 fails to create a 0 on the Arduino Nano
-    brightness                 = beatsin8(16, 0, 254, 0, NUM_LEDS * 2 - i * 2);
-    uint16_t scaled_brightness = brightness * 8;
+    brightness                 = beatsin8(4, 0, 254, 0, NUM_LEDS * 2 - i * 2);
+    uint16_t scaled_brightness = brightness * 10;
     if (scaled_brightness > 255) {
       brightness = 255;
     } else {
